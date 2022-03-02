@@ -1,0 +1,13 @@
+{
+    "name": "aftaa/easy-core",
+    "description": "core",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maxim Gabidullin",
+            "email": "after@ya.ru"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
