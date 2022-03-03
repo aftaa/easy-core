@@ -52,7 +52,7 @@ class Application
             $dependencyInjection->outputActionController($routing);
         } catch (\Exception|\Error $e) {
             header('HTTP/1.0 404 Not found');
-            require_once 'common/404.php';
+            require_once 'vendor/aftaa/easy-core/404.php';
         }
 
         if (self::$debugMode == DebugMode::true) {
