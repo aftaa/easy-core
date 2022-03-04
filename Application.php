@@ -5,6 +5,7 @@ namespace common;
 use common\db\QueryProfiler;
 use common\types\DebugMode;
 use common\types\Environment;
+use exceptions\NotFound;
 
 class Application
 {
@@ -48,13 +49,22 @@ class Application
         $interfaceResolver = new InterfaceResolver(self::$config);
         $dependencyInjection = new DependencyInjection(self::$config, self::$serviceContainer, $interfaceResolver);
         self::$serviceContainer->addObject($dependencyInjection);
-        try {
-            $dependencyInjection->outputActionController($routing);
-        } catch (\Exception|\Error $e) {
-            header('HTTP/1.0 404 Not found');
-            require_once 'vendor/aftaa/easy-core/404.php';
-        }
 
+        try {
+            ob_start();
+            if (null === $routing) {
+                throw new NotFound();
+            }
+            echo $dependencyInjection->outputActionController($routing);
+        } catch (NotFound $exception) {
+            $exception->setHeader();
+            require_once 'vendor/aftaa/easy-core/404.php';
+        } catch (\Throwable $e) {
+            if (self::$debugMode == DebugMode::true) {
+                ob_get_clean();
+                require_once 'app/views/errors/500.php';
+            }
+        }
         if (self::$debugMode == DebugMode::true) {
         }
         $this->debug(self::$serviceContainer);

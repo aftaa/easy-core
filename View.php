@@ -31,21 +31,20 @@ class View
         extract($params);
         require_once "app/views/$fileName.php";
 
+        $headers = [
+            'HTTP/1.0 200 OK',
+            'Content-type: text/html; charset=UTF-8',
+        ];
+
         if (null === $this->layout) {
-            $response = new Response(ob_get_clean(), [
-                '200 OK',
-                'Content-type: text/html; charset=UTF-8',
-            ]);
+            $response = new Response(ob_get_clean(), $headers);
         } else {
             $layout = new Layout(ob_get_clean());
             $params = [];
             foreach ($this as $varName => $varValue) {
                 $params[$varName] = $varValue;
             }
-            $response = new Response($layout->render(layoutFileName: $this->layout, params: $params), [
-                '200 OK',
-                'Content-type: text/html; charset=UTF-8',
-            ]);
+            $response = new Response($layout->render(layoutFileName: $this->layout, params: $params), $headers);
         }
         return $response;
     }

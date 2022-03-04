@@ -4,6 +4,7 @@ namespace common;
 
 use common\types\DebugMode;
 use common\types\RouteDTO;
+use exceptions\Exception404;
 
 class DependencyInjection
 {
@@ -21,25 +22,31 @@ class DependencyInjection
 
     /**
      * @param RouteDTO $routing
-     * @return void
-     * @throws \ReflectionException
+     * @return string
+     * @throws Exception404
      */
-    public function outputActionController(RouteDTO $routing): void
+    public function outputActionController(RouteDTO $routing): string
     {
-        $controller = $this->makeDependencyInjection($routing->controller);
-        $controllerReflection = new \ReflectionObject($controller);
+        try {
+            $controller = $this->makeDependencyInjection($routing->controller);
+            $controllerReflection = new \ReflectionObject($controller);
 
-        $parameters = $controllerReflection->getMethod($routing->action)->getParameters();
-        $arguments = [];
-        foreach ($parameters as $parameter) {
-            $type = $parameter->getType()->getName();
-            $arguments[] = $this->makeDependencyInjection($type);
-        }
+            $parameters = $controllerReflection->getMethod($routing->action)->getParameters();
+            $arguments = [];
+            foreach ($parameters as $parameter) {
+                $type = $parameter->getType()->getName();
+                $arguments[] = $this->makeDependencyInjection($type);
+            }
 
 
-        $response = $controller->{$routing->action}(...$arguments);
-        if (!$response) {
-            echo "<b>Missing the response object.</b><br>";
+            $response = $controller->{$routing->action}(...$arguments);
+            if (!$response) {
+                echo "<b>Missing the response object.</b><br>";
+            }
+        } catch (\ReflectionException $e) {
+            throw new Exception404();
+        } finally {
+            return $response->output();
         }
         echo $response->output();
     }
