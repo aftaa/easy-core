@@ -2,30 +2,39 @@
 
 namespace common;
 
-use common\routes\ViewLayoutTrait;
+use app\config\layout\Config;
+use common\routes\ViewLayoutRoutesTrait;
 
 class Layout
 {
-    use ViewLayoutTrait;
+    use ViewLayoutRoutesTrait;
+
+    private string $content;
 
     /**
-     * @param string $content
+     * @param Config $config
      */
     public function __construct(
-        private string $content,
+        private Config $config,
     )
-    { }
+    {
+    }
 
     /**
-     * @param $layoutFileName
-     * @param $params
-     * @return string
+     * @param string $scriptOutput
+     * @return string|false
      */
-    public function render($layoutFileName, $params): string
+    public function render(string $scriptOutput): string|false
     {
-        ob_start();
-        extract($params);
-        require_once "app/layouts/$layoutFileName.php";
-        return ob_get_clean();
+        try {
+            $filename = "{$this->config->layoutPath}/{$this->config->layout}.php";
+            ob_start();
+            $this->content = $scriptOutput;
+            include $filename;
+            return ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_clean();
+            throw $e;
+        }
     }
 }

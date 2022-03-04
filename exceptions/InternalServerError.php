@@ -32,12 +32,8 @@ class InternalServerError extends \Exception
      * @return Response
      * @throws \Throwable
      */
-    public function render(): Response
+    public function render()
     {
-        $view = new View(new Config());
-        $response = $view->render('errors/500', [
-            'exception' => $this,
-        ]);
-        return $response;
+        echo $this->getMessage();
     }
 }

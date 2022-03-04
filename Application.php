@@ -7,7 +7,7 @@ use common\db\QueryProfiler;
 use common\exceptions\InternalServerError;
 use common\types\DebugMode;
 use common\types\Environment;
-use exceptions\NotFound;
+use common\exceptions\NotFound;
 
 class Application
 {
@@ -53,18 +53,17 @@ class Application
         self::$serviceContainer->addObject($dependencyInjection);
 
         try {
-            //ob_start();
-            if (null === $routing) {
-                throw new NotFound();
-            }
             echo $dependencyInjection->outputActionController($routing)->output();
-//        } catch (NotFound $exception) {
-//            ob_clean();
-//            $exception->setHeader();
-//            require_once 'vendor/aftaa/easy-core/404.php';
+        } catch (NotFound $e) {
+            $view = new View(new Config());
+            echo $view->render('errors/404', [
+                'exception' => $e,
+            ]);
         } catch (\Throwable $e) {
-            $internalServerError = new InternalServerError($e->getMessage());
-            echo $internalServerError->render()->output();
+            $view = new View(new Config());
+            echo $view->render('errors/500', [
+                'exception' => $e,
+            ]);
         }
 
         exit;

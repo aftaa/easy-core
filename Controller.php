@@ -29,11 +29,11 @@ class Controller
      * @param string $fileName
      * @param array $params
      * @return Response
+     * @throws \Throwable
      */
     protected function render(string $fileName, array $params = []): Response
     {
-        $view = new View(new Config);
-        return $view->render($fileName, $params);
+        return (new Response())->makeRender($fileName, $params)->setCode(200);
     }
 
     /**

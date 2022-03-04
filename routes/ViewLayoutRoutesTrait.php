@@ -6,7 +6,7 @@ use common\Application;
 use common\Router;
 use common\types\RouteDTO;
 
-trait ViewLayoutTrait
+trait ViewLayoutRoutesTrait
 {
     /**
      * @param string $name

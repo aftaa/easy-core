@@ -6,8 +6,7 @@ use common\exceptions\InternalServerError;
 use common\http\Response;
 use common\types\DebugMode;
 use common\types\RouteDTO;
-use exceptions\Exception404;
-use exceptions\NotFound;
+use common\exceptions\NotFound;
 
 class DependencyInjection
 {
@@ -24,14 +23,18 @@ class DependencyInjection
     }
 
     /**
-     * @param RouteDTO $routing
-     * @return string
-     * @throws Exception404
+     * @param RouteDTO|null $routing
+     * @return Response
      * @throws InternalServerError
+     * @throws NotFound
      */
-    public function outputActionController(RouteDTO $routing): Response
+    public function outputActionController(?RouteDTO $routing): Response
     {
         try {
+            if (null === $routing) {
+                throw new NotFound();
+            }
+
             $controller = $this->makeDependencyInjection($routing->controller);
             $controllerReflection = new \ReflectionObject($controller);
 
