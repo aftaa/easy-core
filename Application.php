@@ -2,7 +2,9 @@
 
 namespace common;
 
+use app\config\view\Config;
 use common\db\QueryProfiler;
+use common\exceptions\InternalServerError;
 use common\types\DebugMode;
 use common\types\Environment;
 use exceptions\NotFound;
@@ -51,50 +53,20 @@ class Application
         self::$serviceContainer->addObject($dependencyInjection);
 
         try {
-            ob_start();
+            //ob_start();
             if (null === $routing) {
                 throw new NotFound();
             }
-            echo $dependencyInjection->outputActionController($routing);
-        } catch (NotFound $exception) {
-            $exception->setHeader();
-            require_once 'vendor/aftaa/easy-core/404.php';
+            echo $dependencyInjection->outputActionController($routing)->output();
+//        } catch (NotFound $exception) {
+//            ob_clean();
+//            $exception->setHeader();
+//            require_once 'vendor/aftaa/easy-core/404.php';
         } catch (\Throwable $e) {
-            if (self::$debugMode == DebugMode::true) {
-                ob_get_clean();
-                require_once 'app/views/errors/500.php';
-            }
+            $internalServerError = new InternalServerError($e->getMessage());
+            echo $internalServerError->render()->output();
         }
-        if (self::$debugMode == DebugMode::true) {
-        }
-        $this->debug(self::$serviceContainer);
+
         exit;
-    }
-
-    public function debug(ServiceContainer $container)
-    {
-        if (self::$debugMode == debugMode::false) return;
-
-        if (self::$config->debug->container) {
-            echo '<h1>Container</h1><pre>';
-            print_r(self::$serviceContainer->getInstances());
-            echo '</pre>';
-        }
-
-        if (self::$config->debug->queries) {
-            /** @var QueryProfiler $queryProfiler */
-            $queryProfiler = $container->getObjectByClassName(\common\db\QueryProfiler::class);
-            if ($queryProfiler) {
-                echo '<h1>Queries:</h1>';
-                foreach ($queryProfiler->getInfo() as $query) {
-                    echo $query, '<br><br>';
-                }
-            }
-        }
-        if (self::$config->debug->routes) {
-            echo '<h1>Routes:</h1><pre>';
-            $router = new Router;
-            $router->debug();
-        }
     }
 }

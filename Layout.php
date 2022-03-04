@@ -25,7 +25,7 @@ class Layout
     {
         ob_start();
         extract($params);
-        require_once "$layoutFileName.php";
+        require_once "app/layouts/$layoutFileName.php";
         return ob_get_clean();
     }
 }

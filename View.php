@@ -3,6 +3,7 @@
 namespace common;
 
 use app\config\view\Config;
+use common\exceptions\NotFound;
 use common\http\Response;
 use common\routes\ViewLayoutTrait;
 
@@ -10,7 +11,9 @@ class View
 {
     use ViewLayoutTrait;
 
-    public ?string $layout = 'app/layouts/layout.php';
+    private string $layout;
+    private string $output;
+    private ?\Throwable $e = null;
 
     /**
      * @param Config $config
@@ -18,6 +21,20 @@ class View
     public function __construct(Config $config)
     {
         $this->layout = $config->layout;
+    }
+
+    public function requireBuffered(string $filename, array $params = [])
+    {
+        try {
+            ob_start();
+            extract($params);
+            require_once $filename;
+            echo file_get_contents($filename);
+            $this->output =  ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_clean();
+            $this->e = $e;
+        }
     }
 
     /**
@@ -29,7 +46,14 @@ class View
     {
         ob_start();
         extract($params);
-        require_once "app/views/$fileName.php";
+//        require_once "app/views/$fileName.php";
+        $this->requireBuffered("app/views/$fileName.php", $params);
+        return $this->output;
+
+//        if ($this->e instanceof NotFound) {
+            var_dump($this->e);
+            die;
+//        }
 
         $headers = [
             'HTTP/1.0 200 OK',

@@ -2,9 +2,12 @@
 
 namespace common;
 
+use common\exceptions\InternalServerError;
+use common\http\Response;
 use common\types\DebugMode;
 use common\types\RouteDTO;
 use exceptions\Exception404;
+use exceptions\NotFound;
 
 class DependencyInjection
 {
@@ -24,8 +27,9 @@ class DependencyInjection
      * @param RouteDTO $routing
      * @return string
      * @throws Exception404
+     * @throws InternalServerError
      */
-    public function outputActionController(RouteDTO $routing): string
+    public function outputActionController(RouteDTO $routing): Response
     {
         try {
             $controller = $this->makeDependencyInjection($routing->controller);
@@ -41,14 +45,12 @@ class DependencyInjection
 
             $response = $controller->{$routing->action}(...$arguments);
             if (!$response) {
-                echo "<b>Missing the response object.</b><br>";
+                throw new InternalServerError("Missing the response object");
             }
+            return $response;
         } catch (\ReflectionException $e) {
-            throw new Exception404();
-        } finally {
-            return $response->output();
+            throw new NotFound();
         }
-        echo $response->output();
     }
 
     /**
