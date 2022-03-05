@@ -15,7 +15,7 @@ class Response
     ];
 
     private string $output = '';
-    private int $httpCode = 200;
+    private ?int $httpCode = 200;
 
     /**
      * @param string $fileName
@@ -43,7 +43,7 @@ class Response
      * @param int $code
      * @return $this
      */
-    public function setCode(int $code): static
+    public function setCode(?int $code): static
     {
         $this->httpCode = $code;
         return $this;
@@ -54,7 +54,9 @@ class Response
      */
     public function output(): string
     {
-        header(self::HEADERS[$this->httpCode]);
+        if (null !== $this->httpCode) {
+            header(self::HEADERS[$this->httpCode]);
+        }
         return $this->output;
     }
 }

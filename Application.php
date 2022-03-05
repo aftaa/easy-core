@@ -79,10 +79,6 @@ class Application
             echo (new Response())->makeRender('errors/500', [
                 'exception' => $e,
             ])->setCode(500)->output();
-//            $view = new View(new Config());
-//            echo $view->render('errors/500', [
-//                'exception' => $e,
-//            ]);
         }
 
         exit;
