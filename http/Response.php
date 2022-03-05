@@ -29,7 +29,7 @@ class Response
         $scriptOutput = $view->render($fileName, $params);
 
         $layoutConfig = new \app\config\layout\Config();
-        if ($layoutConfig->enabled) {
+        if ($layoutConfig->enabled && $layoutConfig->layoutEnabled($fileName)) {
             $layout = new Layout($layoutConfig);
             $layoutOutput = $layout->render($scriptOutput);
             $this->output = $layoutOutput;
