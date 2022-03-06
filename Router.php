@@ -34,12 +34,29 @@ class Router
     }
 
     /**
+     * @param string $folder
+     * @return array
+     */
+    public function collectFiles(string $folder = 'app/controllers'): array
+    {
+        static $paths = null;
+        foreach (glob("$folder/*.php") as $php) {
+            $paths[] = $php;
+        }
+        $folders = glob("$folder/*", GLOB_ONLYDIR);
+        foreach ($folders as $folder) {
+            $this->collectFiles($folder);
+        }
+        return $paths;
+    }
+
+    /**
      * @return void
      * @throws \ReflectionException
      */
     public function collectRoutes(): void
     {
-        $files = glob('app/controllers/*.php');
+        $files = $this->collectFiles();
         $fileNameToClassName = new FileNameToClassName();
         foreach ($files as $file) {
             $class = $fileNameToClassName->transform($file);
@@ -78,7 +95,7 @@ class Router
      */
     public function findControllerActionByPath(string $path): ?RouteDTO
     {
-        $path = parse_url($path,PHP_URL_PATH);
+        $path = parse_url($path, PHP_URL_PATH);
         if (isset($this->byPath[$path])) {
             $this->activeRoute = $this->byPath[$path];
             return $this->byPath[$path];

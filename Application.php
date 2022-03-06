@@ -3,8 +3,6 @@
 namespace common;
 
 use app\config\view\Config;
-use common\db\QueryProfiler;
-use common\exceptions\InternalServerError;
 use common\http\Response;
 use common\types\DebugMode;
 use common\types\Environment;
@@ -36,10 +34,10 @@ class Application
     }
 
     /**
-     * @return Router
+     * @return RouteDTO|null
      * @throws \ReflectionException
      */
-    private function handleRouter(): RouteDTO
+    private function handleRouter(): ?RouteDTO
     {
         $router = new Router();
         if (self::$config->router->simple) {
@@ -59,11 +57,11 @@ class Application
      */
     public function handle(): never
     {
-        $routing = $this->handleRouter();
-
         $interfaceResolver = new InterfaceResolver(self::$config);
         $dependencyInjection = new DependencyInjection(self::$config, self::$serviceContainer, $interfaceResolver);
         self::$serviceContainer->addObject($dependencyInjection);
+
+        $routing = $this->handleRouter();
 
         try {
             ob_start();
